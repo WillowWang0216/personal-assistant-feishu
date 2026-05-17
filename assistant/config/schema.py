@@ -1,0 +1,326 @@
+"""Configuration schema using Pydantic."""
+
+from pathlib import Path
+from typing import Literal
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings
+
+from assistant.utils.helpers import expand_path, get_data_path, get_workspace_path
+
+
+class WhatsAppConfig(BaseModel):
+    """WhatsApp channel configuration."""
+    enabled: bool = False
+    bridge_url: str = "ws://localhost:3001"
+    allow_from: list[str] = Field(default_factory=list)
+
+
+class TelegramConfig(BaseModel):
+    """Telegram channel configuration."""
+    enabled: bool = False
+    token: str = ""
+    allow_from: list[str] = Field(default_factory=list)
+    proxy: str | None = None
+
+
+class FeishuConfig(BaseModel):
+    """Feishu/Lark channel configuration using WebSocket long connection."""
+    enabled: bool = False
+    app_id: str = ""
+    app_secret: str = ""
+    encrypt_key: str = ""
+    verification_token: str = ""
+    allow_from: list[str] = Field(default_factory=list)
+    media_dir: str = Field(default_factory=lambda: str(get_data_path() / "media"))
+    card_template_id: str = "AAqK6dMNHUVKE"
+    card_template_version_name: str = "1.0.0"
+    streaming_enabled: bool = False
+    streaming_print_frequency_ms_default: int = 20
+    streaming_print_step_default: int = 1
+    streaming_print_strategy: Literal["fast", "delay"] = "delay"
+    streaming_max_updates_per_sec: int = 50
+    streaming_preemptive_timeout_sec: int = 480
+    streaming_finalize_timeout_sec: int = 45
+
+
+class DiscordConfig(BaseModel):
+    """Discord channel configuration."""
+    enabled: bool = False
+    token: str = ""
+    allow_from: list[str] = Field(default_factory=list)
+    gateway_url: str = "wss://gateway.discord.gg/?v=10&encoding=json"
+    intents: int = 37377
+
+
+class ChannelsConfig(BaseModel):
+    """Configuration for chat channels."""
+    whatsapp: WhatsAppConfig = Field(default_factory=WhatsAppConfig)
+    telegram: TelegramConfig = Field(default_factory=TelegramConfig)
+    discord: DiscordConfig = Field(default_factory=DiscordConfig)
+    feishu: FeishuConfig = Field(default_factory=FeishuConfig)
+
+
+class AgentDefaults(BaseModel):
+    """Default agent configuration."""
+    workspace: str = Field(default_factory=lambda: str(get_workspace_path()))
+    model: str = "anthropic/claude-opus-4-5"
+    max_tokens: int = 8192
+    context_window_tokens: int | None = None
+    token_budget_mode: Literal["output", "context"] = "output"
+    merge_subagent_usage: bool = True
+    temperature: float = 0.7
+    reasoning_effort: str | None = None
+    max_tool_iterations: int = 20
+
+
+class AgentsConfig(BaseModel):
+    """Agent configuration."""
+    defaults: AgentDefaults = Field(default_factory=AgentDefaults)
+
+
+class ProviderConfig(BaseModel):
+    """LLM provider configuration."""
+    api_key: str = ""
+    api_base: str | None = None
+
+
+class ProvidersConfig(BaseModel):
+    """Configuration for LLM providers."""
+    anthropic: ProviderConfig = Field(default_factory=ProviderConfig)
+    openai: ProviderConfig = Field(default_factory=ProviderConfig)
+    openrouter: ProviderConfig = Field(default_factory=ProviderConfig)
+    deepseek: ProviderConfig = Field(default_factory=ProviderConfig)
+    groq: ProviderConfig = Field(default_factory=ProviderConfig)
+    zhipu: ProviderConfig = Field(default_factory=ProviderConfig)
+    vllm: ProviderConfig = Field(default_factory=ProviderConfig)
+    gemini: ProviderConfig = Field(default_factory=ProviderConfig)
+    moonshot: ProviderConfig = Field(default_factory=ProviderConfig)
+
+
+class GatewayConfig(BaseModel):
+    """Gateway/server configuration."""
+    host: str = "0.0.0.0"
+    port: int = 18790
+
+
+class WebSearchConfig(BaseModel):
+    """Web search tool configuration."""
+    api_key: str = ""
+    endpoint: str = "https://google.serper.dev/search"
+    country: str | None = None
+    language: str | None = None
+    tbs: str | None = None
+    page: int | None = None
+    autocorrect: bool | None = None
+    search_type: str | None = None
+    max_results: int = 5
+
+
+class WebToolsConfig(BaseModel):
+    """Web tools configuration."""
+    search: WebSearchConfig = Field(default_factory=WebSearchConfig)
+
+
+class ExecToolConfig(BaseModel):
+    """Shell exec tool configuration."""
+    timeout: int = 60
+
+
+class MineruConfig(BaseModel):
+    """MinerU KIE PDF parsing tool configuration."""
+    enabled: bool = True
+    api_url: str = "https://mineru.net/api/v4/extract/task"
+    token: str = ""
+    model_version: str = "vlm"
+    timeout: int = 100
+    poll_interval: int = 5
+    output_dir: str = ""
+
+
+class IflytekConfig(BaseModel):
+    """iFlytek file transcription tool configuration."""
+    enabled: bool = True
+    app_id: str = ""
+    secret_key: str = ""
+    language: str = "cn"
+    poll_interval: int = 3
+    max_wait: int = 120
+
+
+class ImageGenConfig(BaseModel):
+    """Image generation tool configuration."""
+    enabled: bool = True
+    api_base: str = ""
+    api_key: str = ""
+    model_name: str = ""
+    timeout: int = 120
+    retry_attempts: int = 3
+    retry_backoff_seconds: float = 1.0
+    retry_backoff_multiplier: float = 2.0
+    retry_max_backoff_seconds: float = 8.0
+    retry_status_codes: list[int] = Field(default_factory=lambda: [408, 409, 425, 429, 500, 502, 503, 504])
+
+
+class CloudinaryConfig(BaseModel):
+    """Cloudinary image hosting configuration."""
+    cloud_name: str = ""
+    api_key: str = ""
+    api_secret: str = ""
+
+    @property
+    def enabled(self) -> bool:
+        """Whether the config is complete (cloud_name, api_key, api_secret all set)."""
+        return bool(self.cloud_name and self.api_key and self.api_secret)
+
+
+class NotionToolConfig(BaseModel):
+    """Notion tool configuration."""
+    enabled: bool = True
+    api_key: str = ""
+    database_id: str = ""
+    type_database_map: dict[str, str] = Field(default_factory=dict)
+    notion_version: str = "2022-06-28"
+    timeout: int = 30
+    title_property: str = "Name"
+    type_property: str = "Type"
+    source_path_property: str = "Source Path"
+    file_name_property: str = "File Name"
+    content_property: str = "Content"
+    max_content_chars: int = 4000
+    cloudinary: CloudinaryConfig = Field(default_factory=CloudinaryConfig)
+
+
+class ToolHistoryConfig(BaseModel):
+    """Tool history compression configuration for LLM context."""
+    max_events: int = 5
+    preview_chars: int = 160
+    max_chars: int = 800
+    keep_recent_messages: int = 8
+
+
+class ContextCompressionConfig(BaseModel):
+    """Conversation context compression configuration."""
+    enabled: bool = False
+    trigger_by_message_count: int = 80
+    trigger_by_estimated_tokens: int = 12000
+    keep_recent_messages: int = 25
+    keep_recent_tool_messages: int = 8
+    summary_max_tokens: int = 800
+    max_rolling_summary_tokens: int = 2000
+    summary_model: str | None = None
+    min_interval_seconds: int = 60
+
+
+class RetrievalWeightsConfig(BaseModel):
+    """Ranking weights for personal memory retrieval."""
+    keyword: float = 2.0
+    tag: float = 1.5
+    summary: float = 1.5
+    content: float = 1.0
+    priority: float = 0.15
+    recency: float = 0.3
+    kind: float = 0.5
+    scope: float = 0.5
+
+
+class MemorySystemConfig(BaseModel):
+    """Personal memory database + retrieval configuration."""
+    enabled: bool = False
+    db_path: str = Field(default_factory=lambda: str(get_workspace_path() / "memory" / "personal_memory.db"))
+    default_user_id: str = "shared"
+    retrieval_top_k: int = 5
+    fallback_top_k: int = 2
+    core_memory_max_items: int = 8
+    max_candidates_per_run: int = 3
+    max_related_memories: int = 5
+    summary_max_chars: int = 220
+    llm_model: str | None = None
+    update_memory_md: bool = True
+    retrieval_weights: RetrievalWeightsConfig = Field(default_factory=RetrievalWeightsConfig)
+
+
+class ToolsConfig(BaseModel):
+    """Tools configuration."""
+    web: WebToolsConfig = Field(default_factory=WebToolsConfig)
+    exec: ExecToolConfig = Field(default_factory=ExecToolConfig)
+    mineru: MineruConfig = Field(default_factory=MineruConfig)
+    iflytek: IflytekConfig = Field(default_factory=IflytekConfig)
+    image_gen: ImageGenConfig = Field(default_factory=ImageGenConfig)
+    notion: NotionToolConfig = Field(default_factory=NotionToolConfig)
+    tool_history: ToolHistoryConfig = Field(default_factory=ToolHistoryConfig)
+    context_compression: ContextCompressionConfig = Field(default_factory=ContextCompressionConfig)
+    memory_system: MemorySystemConfig = Field(default_factory=MemorySystemConfig)
+    restrict_to_workspace: bool = False
+
+
+class Config(BaseSettings):
+    """Configuration schema using Pydantic."""
+    agents: AgentsConfig = Field(default_factory=AgentsConfig)
+    channels: ChannelsConfig = Field(default_factory=ChannelsConfig)
+    providers: ProvidersConfig = Field(default_factory=ProvidersConfig)
+    gateway: GatewayConfig = Field(default_factory=GatewayConfig)
+    tools: ToolsConfig = Field(default_factory=ToolsConfig)
+
+    @property
+    def workspace_path(self) -> Path:
+        """Get expanded workspace path."""
+        return expand_path(self.agents.defaults.workspace)
+
+    def _match_provider(self, model: str | None = None) -> ProviderConfig | None:
+        """Match a provider based on model name."""
+        model = (model or self.agents.defaults.model).lower()
+        providers = {
+            "openrouter": self.providers.openrouter,
+            "deepseek": self.providers.deepseek,
+            "anthropic": self.providers.anthropic,
+            "claude": self.providers.anthropic,
+            "openai": self.providers.openai,
+            "gpt": self.providers.openai,
+            "gemini": self.providers.gemini,
+            "zhipu": self.providers.zhipu,
+            "glm": self.providers.zhipu,
+            "zai": self.providers.zhipu,
+            "groq": self.providers.groq,
+            "moonshot": self.providers.moonshot,
+            "kimi": self.providers.moonshot,
+            "vllm": self.providers.vllm,
+        }
+        for keyword, provider in providers.items():
+            if keyword in model and provider.api_key:
+                return provider
+        return None
+
+    def get_api_key(self, model: str | None = None) -> str | None:
+        """Get API key for the given model (or default model). Falls back to first available key."""
+        matched = self._match_provider(model)
+        if matched:
+            return matched.api_key
+        for provider in [
+            self.providers.openrouter, self.providers.deepseek,
+            self.providers.anthropic, self.providers.openai,
+            self.providers.gemini, self.providers.zhipu,
+            self.providers.moonshot, self.providers.vllm,
+            self.providers.groq,
+        ]:
+            if provider.api_key:
+                return provider.api_key
+        return None
+
+    def get_api_base(self, model: str | None = None) -> str | None:
+        """Get API base URL based on model name."""
+        model = (model or self.agents.defaults.model).lower()
+        if "openrouter" in model:
+            return self.providers.openrouter.api_base or "https://openrouter.ai/api/v1"
+        if any(k in model for k in ("openai", "gpt")):
+            return self.providers.openai.api_base
+        if any(k in model for k in ("zhipu", "glm", "zai")):
+            return self.providers.zhipu.api_base
+        if "vllm" in model:
+            return self.providers.vllm.api_base
+        if self.providers.openai.api_base:
+            return self.providers.openai.api_base
+        return None
+
+    class Config:
+        env_prefix = "NANOBOT_"
+        env_nested_delimiter = "__"

@@ -1,0 +1,211 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": "C:\\Users\\xlab_w\\.nanobot\\workspace",
+      "model": "openai/MiniMax-M2.5-highspeed",
+      "maxTokens": 8192,
+      "contextWindowTokens": null,
+      "tokenBudgetMode": "output",
+      "mergeSubagentUsage": true,
+      "temperature": 0.7,
+      "reasoningEffort": null,
+      "maxToolIterations": 20
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": false,
+      "bridgeUrl": "ws://localhost:3001",
+      "allowFrom": []
+    },
+    "telegram": {
+      "enabled": false,
+      "token": "YOUR_MINERU_TOKEN",
+      "allowFrom": [],
+      "proxy": null
+    },
+    "discord": {
+      "enabled": false,
+      "token": "YOUR_MINERU_TOKEN",
+      "allowFrom": [],
+      "gatewayUrl": "wss://gateway.discord.gg/?v=10&encoding=json",
+      "intents": 37377
+    },
+    "feishu": {
+      "enabled": true,
+      "appId": "",
+      "appSecret": "",
+      "encryptKey": "",
+      "verificationToken": "",
+      "allowFrom": [],
+      "mediaDir": "C:\\Users\\xlab_w\\.nanobot\\media",
+      "cardTemplateId": "YOUR_CARD_TEMPLATE_ID",
+      "cardTemplateVersionName": "1.0.1",
+      "streamingEnabled": false,
+      "streamingPrintFrequencyMsDefault": 20,
+      "streamingPrintStepDefault": 1,
+      "streamingPrintStrategy": "delay",
+      "streamingMaxUpdatesPerSec": 50,
+      "streamingPreemptiveTimeoutSec": 480,
+      "streamingFinalizeTimeoutSec": 45
+    }
+  },
+  "providers": {
+    "anthropic": {
+      "apiKey": "",
+      "apiBase": null
+    },
+    "openai": {
+      "apiKey": "",
+      "apiBase": "https://v2.aicodee.com/v1"
+    },
+    "openrouter": {
+      "apiKey": "",
+      "apiBase": null
+    },
+    "deepseek": {
+      "apiKey": "",
+      "apiBase": null
+    },
+    "groq": {
+      "apiKey": "",
+      "apiBase": null
+    },
+    "zhipu": {
+      "apiKey": "",
+      "apiBase": null
+    },
+    "vllm": {
+      "apiKey": "",
+      "apiBase": null
+    },
+    "gemini": {
+      "apiKey": "",
+      "apiBase": null
+    },
+    "moonshot": {
+      "apiKey": "",
+      "apiBase": null
+    }
+  },
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 18790
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "apiKey": "",
+        "endpoint": "https://google.serper.dev/search",
+        "country": null,
+        "language": null,
+        "tbs": null,
+        "page": null,
+        "autocorrect": null,
+        "searchType": null,
+        "maxResults": 5
+      }
+    },
+    "exec": {
+      "timeout": 60
+    },
+    "mineru": {
+      "enabled": true,
+      "apiUrl": "https://mineru.net/api/v4/extract/task",
+      "token": "YOUR_MINERU_TOKEN",
+      "modelVersion": "vlm",
+      "timeout": 100,
+      "pollInterval": 5,
+      "outputDir": ""
+    },
+    "imageGen": {
+      "enabled": true,
+      "apiBase": "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation",
+      "apiKey": "",
+      "modelName": "wan2.6-t2i",
+      "timeout": 120,
+      "retryAttempts": 3,
+      "retryBackoffSeconds": 1.0,
+      "retryBackoffMultiplier": 2.0,
+      "retryMaxBackoffSeconds": 8.0,
+      "retryStatusCodes": [
+        408,
+        409,
+        425,
+        429,
+        500,
+        502,
+        503,
+        504
+      ]
+    },
+    "iflytek": {
+      "enabled": false,
+      "appId": "",
+      "secretKey": "",
+      "language": "cn",
+      "pollInterval": 3,
+      "maxWait": 120
+    },
+    "notion": {
+      "enabled": true,
+      "apiKey": "",
+      "databaseId": "",
+      "typeDatabaseMap": {},
+      "notionVersion": "2022-06-28",
+      "timeout": 30,
+      "titleProperty": "Name",
+      "typeProperty": "Type",
+      "sourcePathProperty": "Source Path",
+      "fileNameProperty": "File Name",
+      "contentProperty": "Content",
+      "maxContentChars": 4000,
+      "cloudinary": {
+        "cloudName": "",
+        "apiKey": "",
+        "apiSecret": ""
+      }
+    },
+    "toolHistory": {
+      "maxEvents": 5,
+      "previewChars": 160,
+      "maxChars": 800,
+      "keepRecentMessages": 8
+    },
+    "contextCompression": {
+      "enabled": false,
+      "triggerByMessageCount": 80,
+      "triggerByEstimatedTokens": 12000,
+      "keepRecentMessages": 25,
+      "keepRecentToolMessages": 8,
+      "summaryMaxTokens": 800,
+      "maxRollingSummaryTokens": 2000,
+      "summaryModel": null,
+      "minIntervalSeconds": 60
+    },
+    "memorySystem": {
+      "enabled": false,
+      "dbPath": "C:\\Users\\xlab_w\\.nanobot\\workspace\\memory\\personal_memory.db",
+      "defaultUserId": "shared",
+      "retrievalTopK": 5,
+      "fallbackTopK": 2,
+      "coreMemoryMaxItems": 8,
+      "maxCandidatesPerRun": 3,
+      "maxRelatedMemories": 5,
+      "summaryMaxChars": 220,
+      "llmModel": null,
+      "updateMemoryMd": true,
+      "retrievalWeights": {
+        "keyword": 2.0,
+        "tag": 1.5,
+        "summary": 1.5,
+        "content": 1.0,
+        "priority": 0.15,
+        "recency": 0.3,
+        "kind": 0.5,
+        "scope": 0.5
+      }
+    },
+    "restrictToWorkspace": false
+  }
+}
